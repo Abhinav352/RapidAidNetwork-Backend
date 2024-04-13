@@ -1,6 +1,6 @@
 const express = require('express');
+const axios = require('axios');
 const signupRouter = require('./controllers/register');
-const axios = require('axios')
 const loginRouter = require('./controllers/login');
 const RequestController = require('./controllers/RequestCont');
 const cors = require('cors');
@@ -93,18 +93,19 @@ app.get('/Profile', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.post('/Profile/upload/:userEmail', upload.single('profilePicture'), async (req, res) => {
+app.get('/Profile/:userEmail', async (req, res) => {
   try {
-    const userEmail = req.params.userEmail;
-    const profilePicturePath = req.file.path;
+    const { userEmail } = req.params; // Corrected line
+    console.log({userEmail})
+    const userProfile = await userInfo.findOne({ userEmail });
 
-    // Update the user's profile picture URL in the database
-    await userInfo.findOneAndUpdate({ userEmail }, { profilePic: profilePicturePath });
-
-    res.status(200).json({ message: 'Profile picture uploaded successfully' });
+    if (userProfile) {
+      res.json(userProfile);
+    } else {
+      res.status(404).json({ error: 'User not found' });
+    }
   } catch (error) {
-    console.error('Error uploading profile picture:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: error.message });
   }
 });
 app.get('/Location/:accessToken', async (req, res) => {
@@ -121,10 +122,10 @@ app.get('/Location/:accessToken', async (req, res) => {
         'Content-Type': 'application/json',
       },
     });
-    console.log(userDatetime);
-    console.log('Disaster Data Response:', response.data); // Log the response data
-    console.log('Response Status:', response.status);
-    console.log('Response Headers:', response.headers);
+    // console.log(userDatetime);
+    // console.log('Disaster Data Response:', response.data); // Log the response data
+    // console.log('Response Status:', response.status);
+    // console.log('Response Headers:', response.headers);
 
     if (response.status === 204) {
       console.log('No content in the response.');
@@ -132,12 +133,12 @@ app.get('/Location/:accessToken', async (req, res) => {
     }
 
     disasterData=response.data.data;
+    console.log(disasterData);
     res.send(disasterData)
   } catch (error) {
     console.error('Error fetching data:', error.message);
   }
   });
-
 
 app.get('/News/:currentPage',async(req,res)=>
 {
@@ -156,6 +157,21 @@ app.get('/News/:currentPage',async(req,res)=>
     console.error('Error fetching news:', error);
   });
 })
+app.post('/Profile/upload/:userEmail', upload.single('profilePicture'), async (req, res) => {
+  try {
+    const userEmail = req.params.userEmail;
+    const profilePicturePath = req.file.path;
+
+    // Update the user's profile picture URL in the database
+    await userInfo.findOneAndUpdate({ userEmail }, { profilePic: profilePicturePath });
+
+    res.status(200).json({ message: 'Profile picture uploaded successfully' });
+  } catch (error) {
+    console.error('Error uploading profile picture:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 app.post('/createRoom', async (req, res) => {
   try {
     const { user1, user2, userName1, userName2 } = req.body;
