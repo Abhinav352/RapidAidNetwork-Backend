@@ -1,6 +1,6 @@
 const express = require('express');
-const axios = require('axios');
 const signupRouter = require('./controllers/register');
+const axios = require('axios')
 const loginRouter = require('./controllers/login');
 const RequestController = require('./controllers/RequestCont');
 const cors = require('cors');
@@ -15,6 +15,7 @@ const messageController = require('./controllers/MessageContt');
 const { v4: uuidv4 } = require('uuid');
 const Room = require('./models/Room');
 const userInfo = require('./models/User');
+
 
 const app = express();
 const server = http.createServer(app);
@@ -93,19 +94,18 @@ app.get('/Profile', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/Profile/:userEmail', async (req, res) => {
+app.post('/Profile/upload/:userEmail', upload.single('profilePicture'), async (req, res) => {
   try {
-    const { userEmail } = req.params; // Corrected line
-    console.log({userEmail})
-    const userProfile = await userInfo.findOne({ userEmail });
+    const userEmail = req.params.userEmail;
+    const profilePicturePath = req.file.path;
 
-    if (userProfile) {
-      res.json(userProfile);
-    } else {
-      res.status(404).json({ error: 'User not found' });
-    }
+    // Update the user's profile picture URL in the database
+    await userInfo.findOneAndUpdate({ userEmail }, { profilePic: profilePicturePath });
+
+    res.status(200).json({ message: 'Profile picture uploaded successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error uploading profile picture:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 app.get('/Location/:accessToken', async (req, res) => {
@@ -140,6 +140,7 @@ app.get('/Location/:accessToken', async (req, res) => {
   }
   });
 
+
 app.get('/News/:currentPage',async(req,res)=>
 {
   const apiKey = '38655dcf36c84609b9ce91bf0574fe05';
@@ -157,21 +158,6 @@ app.get('/News/:currentPage',async(req,res)=>
     console.error('Error fetching news:', error);
   });
 })
-app.post('/Profile/upload/:userEmail', upload.single('profilePicture'), async (req, res) => {
-  try {
-    const userEmail = req.params.userEmail;
-    const profilePicturePath = req.file.path;
-
-    // Update the user's profile picture URL in the database
-    await userInfo.findOneAndUpdate({ userEmail }, { profilePic: profilePicturePath });
-
-    res.status(200).json({ message: 'Profile picture uploaded successfully' });
-  } catch (error) {
-    console.error('Error uploading profile picture:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
 app.post('/createRoom', async (req, res) => {
   try {
     const { user1, user2, userName1, userName2 } = req.body;
