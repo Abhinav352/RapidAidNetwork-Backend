@@ -145,7 +145,7 @@ app.get('/News/:currentPage',async(req,res)=>
   const currentPage= req.params.currentPage;
   console.log(currentPage);
     const pageSize = 20;
-    const disasterKeywords = 'earthquake OR hurricane OR tornado OR flood OR tsunami OR wildfire OR drought OR blizzard OR landslide OR cyclone OR typhoon OR avalanche OR heatwave OR sandstorm OR -Activision OR -OverWatch OR -Midnight OR -AI OR -putin OR -Diablo';
+    const disasterKeywords = 'earthquake OR hurricane OR tornado OR flood OR tsunami OR wildfire OR drought OR blizzard OR landslide OR cyclone OR typhoon OR avalanche OR heatwave OR sandstorm OR -Activision OR -OverWatch OR -Midnight OR -AI OR -putin OR -Diablo OR -Games';
     const apiUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(disasterKeywords)}&searchIn=title&pageSize=${pageSize}&page=${currentPage}&apiKey=${apiKey}&language=en`;
   axios.get(apiUrl)
   .then(response => {
